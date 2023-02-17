@@ -2,15 +2,14 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { Client, Events, GatewayIntentBits, Collection } = require('discord.js');
-
-const player = new player(client);
+const { Player } = require('discord-player');
 
 // Allows use of dotenv enviroment variables
 require('dotenv').config();
 const token = process.env.DISCORD_TOKEN;
 
 // Create a new client instance
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates] });
 
 // Add all avaliable commands to client
 client.commands = new Collection();
@@ -29,44 +28,30 @@ for (const file of commandFiles) {
 	}
 }
 
+const player = new Player(client);
+
 client.on(Events.InteractionCreate, async interaction => {
 	if (!interaction.isChatInputCommand()) return;
 	const command = interaction.client.commands.get(interaction.commandName);
+
+	if (interaction.commandName === 'play' | interaction.commandName === 'stop') {
+		if (!interaction.member.voice.channelId) return await interaction.reply({ content: 'You are not in a voice channel!', ephemeral: true });
+		if (interaction.guild.members.me.voice.channelId && interaction.member.voice.channelId !== interaction.guild.members.me.voice.channelId) return await interaction.reply({ content: 'You are not in my voice channel!', ephemeral: true });
+		try {
+			await command.execute(interaction,player);
+		}
+		catch (error) {
+			console.error(error);
+			await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+		}
+	}
 
 	if (!command) {
 		console.error(`No command matching ${interaction.commandName} was found.`);
 		return;
 	}
 
-	try {
-		await command.execute(interaction);
-	}
-	catch (error) {
-		console.error(error);
-		await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
-	}
-});
-
-
-// Responses to Bot States & Events
-player.on('trackStart', (queue, track) => {
-	queue.metadata.send(`🎶 | Started playing: **${track.title}** in **${queue.connection.channel.name}**!`);
-});
-
-player.on('trackAdd', (queue, track) => {
-	queue.metadata.send(`🎶 | Track **${track.title}** queued!`);
-});
-
-player.on('botDisconnect', (queue) => {
-	queue.metadata.send('❌ | I was manually disconnected from the voice channel, clearing queue!');
-});
-
-player.on('channelEmpty', (queue) => {
-	queue.metadata.send('❌ | Nobody is in the voice channel, leaving...');
-});
-
-player.on('queueEnd', (queue) => {
-	queue.metadata.send('✅ | Queue finished!');
+	
 });
 
 

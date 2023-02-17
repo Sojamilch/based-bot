@@ -1,22 +1,17 @@
 {
   "dependencies": {
-    "@discordjs/opus": "^0.9.0",
+    "@discordjs/opus": "^0.8.0",
     "discord-player": "^5.4.0",
     "discord.js": "^14.7.1",
-    "dotenv": "^16.0.3",
-    "ffmpeg": "^0.0.4",
-    "fluent-ffmpeg": "^2.1.2",
-    "prettier": "^2.5.1",
-    "ytdl-core": "^4.11.2"
-  },
-  "devDependencies": {
-    "eslint": "^8.34.0",
-    "eslint-config-prettier": "^8.6.0"
+    "ffmpeg-static": "^5.1.0"
   },
   "name": "based-bot",
   "description": "Does some cool stuff",
   "version": "1.0.0",
-  "main": "discord.js",
+  "main": "index.js",
+  "devDependencies": {
+    "dotenv": "^16.0.3"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
