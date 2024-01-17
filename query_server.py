@@ -61,6 +61,6 @@ def get_players(host='localhost', port=25565):
 
     # Load json and return
     data = json.loads(d)
-        
-    
+
+
     return data['players']['sample']

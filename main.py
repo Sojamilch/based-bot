@@ -22,6 +22,13 @@ guilds = []
 minecraftServerIps = {}
 
 
+def read_json():
+    with open("minecraft.json", "r") as file:
+        loadedJson = json.load(file)
+
+    return loadedJson
+
+
 @client.event
 async def on_guild_join(guild):
     guilds.append(guild)
@@ -44,23 +51,33 @@ async def sync_commands(interaction: discord.Interaction):
 @tree.command(name='set-server-ip', description='Sets the minecraft server IP & Port')
 async def set_server_ip(interaction: discord.Interaction, ip: str = '127.0.0.1', port: int = 25565):
 
-    minecraftServerIps[interaction.guild_id] = {'ip': ip, 'port': port}
+    if not interaction.user.guild_permissions.administrator:
+        await interaction.response.send_message("You must be and Administrator to run this command.", ephemeral=True)
+        return
 
-    await interaction.response.send_message(f"Added server {ip}:{port}", ephemeral=True)
+    minecraftServerIps[str(interaction.guild_id)] = {'ip': ip, 'port': port}
+
+    with open('minecraft.json', 'w') as file:
+        json.dump(minecraftServerIps, file)
+
+    await interaction.response.send_message(f"Server Set {ip}:{port}", ephemeral=True)
 
 
 @tree.command(name='get-server-players', description='Gets the players currently on the server')
 async def get_server_players(interaction: discord.Interaction):
+
+    guild_id = str(interaction.guild_id)
     try:
-        players = get_players(minecraftServerIps[interaction.guild_id]
-                              ['ip'], minecraftServerIps[interaction.guild_id]['port'])
+        players = get_players(minecraftServerIps[guild_id]
+                              ['ip'], minecraftServerIps[guild_id]['port'])
 
     except:
-        await interaction.response.send_message("No Minecraft Server Found...", ephemeral=True)
+        await interaction.response.send_message(f"No Minecraft Server Found @ {minecraftServerIps[guild_id]['ip']}:{minecraftServerIps[guild_id]['port']}", ephemeral=True)
         return
 
     embed = discord.Embed(title=interaction.guild.name)
     onlinePlayers = ""
+
     for player in players:
         if (player == "Anonymous Player"):
             continue
@@ -81,4 +98,5 @@ async def on_ready():
     # guilds = [guild async for guild in client.fetch_guilds(limit=150)]
     # print(f'Cached {len(guilds)} guilds.')
 
+minecraftServerIps = read_json()
 client.run(TOKEN)
