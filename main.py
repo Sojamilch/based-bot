@@ -85,7 +85,7 @@ async def get_server_players(interaction: discord.Interaction):
 
     # Creates a list with player names on new lines for discord
     for player in players:
-        if (player != "Anonymous Player"):
+        if (player['name'] != "Anonymous Player"):
             onlinePlayers += f"\n{player['name']}"
 
     embed.add_field(name="Online Players:", value=onlinePlayers, inline=False)
@@ -102,7 +102,7 @@ async def on_ready():
     await tree.sync(guild=client.get_guild(TEST_GUILD_ID))
 
     print(f'Caching guilds...')  # Currently has no real use. Just sounds cool
-    guilds = [guild async for guild in client.fetch_guilds(limit=150)]
+    # guilds = [guild async for guild in client.fetch_guilds(limit=150)]
     print(f'Cached {len(guilds)} guilds.')
 
 minecraftServerIps = read_json()
