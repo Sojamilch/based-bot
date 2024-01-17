@@ -85,9 +85,8 @@ async def get_server_players(interaction: discord.Interaction):
 
     # Creates a list with player names on new lines for discord
     for player in players:
-        if (player == "Anonymous Player"):
-            continue
-        onlinePlayers += f"\n{player['name']}"
+        if (player != "Anonymous Player"):
+            onlinePlayers += f"\n{player['name']}"
 
     embed.add_field(name="Online Players:", value=onlinePlayers, inline=False)
     await interaction.response.send_message(embed=embed)
