@@ -11,6 +11,7 @@ TOKEN = os.getenv('TOKEN')
 OWNER_ID = int(os.getenv('OWNER_ID'))
 TEST_GUILD_ID = int(os.getenv('TEST_GUILD_ID'))
 
+
 intents = discord.Intents.default()
 intents.message_content = True
 intents.guilds = True
@@ -37,7 +38,7 @@ async def on_guild_join(guild):
     await tree.sync(guild=guild)
 
 
-@tree.command(name='sync-commands', description='Owner only')
+@tree.command(name='sync-commands', description='Owner only', guild=client.get_guild(TEST_GUILD_ID))
 async def sync_commands(interaction: discord.Interaction):
     if interaction.user.id == OWNER_ID:
         await tree.sync()
