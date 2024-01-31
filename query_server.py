@@ -37,10 +37,14 @@ def pack_port(i):
 
 
 async def get_server(host='localhost', port=25565):
-
+    # Empty server
+    data = {}
     # Connect
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect((host, port))
+    try:
+        s.connect((host, port))
+    except:
+        return data
 
     # Send handshake + status request
     s.send(pack_data(b"\x00\x00" + pack_data(host.encode('utf8')) +
@@ -63,6 +67,6 @@ async def get_server(host='localhost', port=25565):
     try:
         data = json.loads(d)
     except:
-        return {}
+        return data
 
     return data

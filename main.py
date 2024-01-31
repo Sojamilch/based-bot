@@ -85,12 +85,12 @@ async def get_server_players(interaction: discord.Interaction):
     #    await interaction.followup.send(f"Noone is home @{minecraftServerIps[guild_id]['ip']}:{minecraftServerIps[guild_id]['port']}")
     #    return
 
-    serverStatus = ":green_square:"
     if not server:
-        serverStatus = ":red_square:"
+        await interaction.followup.send(embed=create_server_embed())
+        return
 
+    serverStatus = ":green_square:"
     serverVersion = server['version']['name']
-
     onlinePlayers = ""
 
     # Creates a list with player names on new lines for discord
@@ -101,7 +101,12 @@ async def get_server_players(interaction: discord.Interaction):
     else:
         onlinePlayers = ":cricket:"
 
-    embed = discord.Embed(title=interaction.guild.name)
+    await interaction.followup.send(embed=create_server_embed(serverVersion, serverStatus, onlinePlayers, interaction.guild.name))
+
+
+def create_server_embed(serverVersion="", serverStatus=":red_square:", onlinePlayers=":cricket:", guildName="Server Offline"):
+
+    embed = discord.Embed(title=guildName)
 
     embed.add_field(name="Server Version:",
                     value=serverVersion, inline=False)
@@ -109,7 +114,7 @@ async def get_server_players(interaction: discord.Interaction):
                     value=serverStatus, inline=True)
 
     embed.add_field(name="Online Players:", value=onlinePlayers, inline=False)
-    await interaction.followup.send(embed=embed)
+    return embed
 
 
 @client.event
