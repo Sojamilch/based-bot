@@ -36,7 +36,7 @@ def pack_port(i):
     return struct.pack('>H', i)
 
 
-def get_players(host='localhost', port=25565):
+async def get_server(host='localhost', port=25565):
 
     # Connect
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -60,7 +60,9 @@ def get_players(host='localhost', port=25565):
     s.close()
 
     # Load json and return
-    data = json.loads(d)
+    try:
+        data = json.loads(d)
+    except:
+        return {}
 
-
-    return data['players']['sample']
+    return data

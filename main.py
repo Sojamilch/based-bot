@@ -2,7 +2,7 @@ import discord
 from discord import app_commands
 import os
 from dotenv import load_dotenv
-from query_server import get_players
+from query_server import get_server
 import json
 
 load_dotenv()
@@ -68,28 +68,48 @@ async def set_server_ip(interaction: discord.Interaction, ip: str = '127.0.0.1',
 @tree.command(name='get-server-players', description='Gets the players currently on the server')
 async def get_server_players(interaction: discord.Interaction):
 
+    await interaction.response.defer()
     guild_id = str(interaction.guild_id)
-    try:
-        # Gets the list of players via a TCP connection to the server
-        players = get_players(
-            minecraftServerIps[guild_id]['ip'],
-            minecraftServerIps[guild_id]['port']
-        )
+    server = {}
 
-    except:
-        await interaction.response.send_message(f"No Minecraft Server Found @ {minecraftServerIps[guild_id]['ip']}:{minecraftServerIps[guild_id]['port']}", ephemeral=True)
-        return
+    # Gets the list of players via a TCP connection to the server
+    server = await get_server(
+        minecraftServerIps[guild_id]['ip'],
+        minecraftServerIps[guild_id]['port']
+    )
 
-    embed = discord.Embed(title=interaction.guild.name)
+    # if not server:
+    #     await interaction.followup.send(f"No Minecraft Server Found @ {minecraftServerIps[guild_id]['ip']}:{minecraftServerIps[guild_id]['port']}")
+    #     return
+    # elif
+    #    await interaction.followup.send(f"Noone is home @{minecraftServerIps[guild_id]['ip']}:{minecraftServerIps[guild_id]['port']}")
+    #    return
+
+    serverStatus = ":green_square:"
+    if not server:
+        serverStatus = ":red_square:"
+
+    serverVersion = server['version']['name']
+
     onlinePlayers = ""
 
     # Creates a list with player names on new lines for discord
-    for player in players:
-        if (player['name'] != "Anonymous Player"):
+    if server['players']['online'] > 0:
+        for player in server['players']['sample']:
+            # if (player['name'] != "Anonymous Player"):
             onlinePlayers += f"\n{player['name']}"
+    else:
+        onlinePlayers = ":cricket:"
+
+    embed = discord.Embed(title=interaction.guild.name)
+
+    embed.add_field(name="Server Version:",
+                    value=serverVersion, inline=False)
+    embed.add_field(name="Server Status: ",
+                    value=serverStatus, inline=True)
 
     embed.add_field(name="Online Players:", value=onlinePlayers, inline=False)
-    await interaction.response.send_message(embed=embed)
+    await interaction.followup.send(embed=embed)
 
 
 @client.event
